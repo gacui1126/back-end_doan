@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProjectUserTable extends Migration
+class CreateProjectTeamTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateProjectUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('project_user', function (Blueprint $table) {
+        Schema::create('project_team', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
             $table->integer('project_id');
+            $table->integer('team_id');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ class CreateProjectUserTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('project_user');
+        Schema::dropIfExists('project_team');
     }
 }

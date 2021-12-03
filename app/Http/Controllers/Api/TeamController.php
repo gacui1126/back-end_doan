@@ -74,4 +74,10 @@ class TeamController extends Controller
             'message' => 'Thay đổi thành công'
         ],201);
     }
+    public function getAllTeam(){
+        $team = Teams::all();
+        return response()->json([
+            'data' => $team
+        ],200);
+    }
 }
