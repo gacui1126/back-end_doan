@@ -65,6 +65,38 @@ Route::prefix('project')->group(function(){
 
 });
 
+Route::prefix('task')->group(function(){
+    Route::post('/create','Api\TaskController@create');
+    Route::post('/get-all','Api\TaskController@getAll');
+    Route::post('/update/name','Api\TaskController@updateName');
+    Route::post('/edit-name','Api\TaskController@editName');
+    Route::post('/delete','Api\TaskController@deleteTask');
+    Route::post('/get','Api\TaskController@getTask');
+    // Route::get('/parameter','Api\TaskController@parameter');
+
+});
+
+Route::prefix('task-detail')->group(function(){
+    Route::post('/create','Api\TaskDetailController@create');
+    Route::post('/get','Api\TaskDetailController@get');
+    Route::post('/get/task-card','Api\TaskDetailController@getTaskCard');
+    Route::post('/add/user','Api\TaskDetailController@addUser');
+    Route::post('/get/user','Api\TaskDetailController@getUser');
+    Route::post('/delete/user','Api\TaskDetailController@deleteUser');
+    Route::post('/get/user-of-team','Api\TaskDetailController@userOfTeam');
+
+});
+
+Route::prefix('tag')->group(function(){
+    Route::post('/create','Api\TagController@create');
+    Route::post('/get-tag-user','Api\TagController@getTagUser');
+    Route::post('/add-tag-task','Api\TagController@addTagTask');
+    Route::post('/get-tag-taskdetail','Api\TagController@getTagTaskDetail');
+    Route::post('/edit','Api\TagController@editTag');
+    Route::post('/update','Api\TagController@update');
+
+});
+
 
 
 
