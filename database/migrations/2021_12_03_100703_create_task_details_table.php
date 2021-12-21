@@ -19,6 +19,8 @@ class CreateTaskDetailsTable extends Migration
             $table->integer('task_id');
             $table->integer('user_create_id');
             $table->integer('project_id');
+            $table->integer('completed')->nullable();
+            $table->dateTime('deadline')->nullable();
             $table->timestamps();
         });
     }

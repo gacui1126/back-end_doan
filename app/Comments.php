@@ -10,11 +10,11 @@ class Comments extends Model
 
     public function replies()
     {
-        return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comments::class,'parent_id', 'id');
     }
 
     public function user()
     {
-        return $this->belongsTo('App\User','id_user','id');
+        return $this->belongsTo(User::class,'user_id','id');
     }
 }

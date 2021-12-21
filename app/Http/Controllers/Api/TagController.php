@@ -20,6 +20,8 @@ class TagController extends Controller
             'tag_id' => $tag->id,
             'user_id' => $req->userId
         ]);
+        $tag->tagColorF = true;
+        $tag->check = false;
         return response()->json([
             'message' => 'Tạo task thành công',
             'data' => $tag

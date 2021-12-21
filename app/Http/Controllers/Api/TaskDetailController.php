@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Teams;
 use App\User;
+use Carbon\Carbon;
+
 
 class TaskDetailController extends Controller
 {
@@ -92,6 +94,82 @@ class TaskDetailController extends Controller
         $user = DB::table('task_detail_user')->whereTask_detail_idAndUser_id($req->taskId,$req->userId)->delete();
         return response()->json([
             'message' => 'Xoá user khỏi thẻ thành công'
+        ],200);
+    }
+
+    public function setDeadline(Request $req){
+        $deadline = date('Y-m-d H:i:s', strtotime($req->deadline));
+        $taskDetail = Task_details::where('id',$req->taskDetailId)->first();
+        $taskDetail->deadline = $deadline;
+        $taskDetail->update();
+        $now = date('Y-m-d H:i:s', strtotime(Carbon::now('Asia/Ho_Chi_Minh')));
+        $date = Carbon::parse($deadline);
+        if($date > $now){
+            $diff = $date->diffInMinutes($now);
+
+            return response()->json([
+                'message' => 'Chọn thời gian deadline thành công',
+                'data' => $deadline,
+                'dayDeadline' => $diff,
+            ],200);
+        }else{
+            return response()->json([
+                'message' => 'Chọn thời gian deadline thành công',
+                'data' => $deadline,
+                'dayDeadline' => 0,
+            ],200);
+        }
+
+    }
+    public function getDeadline(Request $req){
+        $taskDetail = Task_details::where('id',$req->taskDetailId)->first();
+        // $now = Carbon::now('Asia/Ho_Chi_Minh');
+        $now = date('Y-m-d H:i:s', strtotime(Carbon::now('Asia/Ho_Chi_Minh')));
+        $date = Carbon::parse($taskDetail->deadline);
+        if($date > $now){
+            $diff = $date->diffInMinutes($now);
+
+            return response()->json([
+                'data' => $taskDetail->deadline,
+                'dayDeadline' => $diff,
+            ],200);
+        }else{
+            return response()->json([
+                'data' => $taskDetail->deadline,
+                'dayDeadline' => 0,
+            ],200);
+        }
+
+    }
+    public function deleteDeadline(Request $req){
+        DB::table('task_details')->where('id',$req->taskDetailId)->update([
+            'deadline' => null,
+            'completed' => null
+        ]);
+        return response()->json([
+            'message' => 'Xoá deadline thành công',
+            'data' => null
+        ],200);
+    }
+    public function completed(Request $req){
+        DB::table('task_details')->where('id',$req->taskDetailId)->update([
+            'completed' => $req->checkDate
+        ]);
+        return response()->json([
+            'data' => $req->checkDate
+        ],200);
+    }
+    public function getCompleted(Request $req){
+        $taskDetail = Task_details::where('id',$req->taskDetailId)->first();
+        return response()->json([
+            'data' => $taskDetail->completed
+        ],200);
+    }
+    public function delete(Request $req){
+        $taskDetail = Task_details::where('id',$req->id)->delete();
+        return response()->json([
+            'message' => ' xoá thành công',
+            'data' => $taskDetail
         ],200);
     }
 }

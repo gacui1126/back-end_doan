@@ -84,6 +84,12 @@ Route::prefix('task-detail')->group(function(){
     Route::post('/get/user','Api\TaskDetailController@getUser');
     Route::post('/delete/user','Api\TaskDetailController@deleteUser');
     Route::post('/get/user-of-team','Api\TaskDetailController@userOfTeam');
+    Route::post('/deadline/set','Api\TaskDetailController@setDeadline');
+    Route::post('/deadline/get','Api\TaskDetailController@getDeadline');
+    Route::post('/deadline/delete','Api\TaskDetailController@deleteDeadline');
+    Route::post('/completed','Api\TaskDetailController@completed');
+    Route::post('/completed/get','Api\TaskDetailController@getCompleted');
+    Route::post('/delete','Api\TaskDetailController@delete');
 
 });
 
@@ -94,6 +100,28 @@ Route::prefix('tag')->group(function(){
     Route::post('/get-tag-taskdetail','Api\TagController@getTagTaskDetail');
     Route::post('/edit','Api\TagController@editTag');
     Route::post('/update','Api\TagController@update');
+
+});
+
+Route::prefix('job')->group(function(){
+    Route::post('/create','Api\JobController@create');
+    Route::post('/get','Api\JobController@get');
+    Route::post('/delete','Api\JobController@delete');
+    Route::post('/job-detail/create','Api\JobController@createJobDetail');
+    Route::post('/job-detail/get','Api\JobController@getJobDetail');
+    Route::post('/job-detail/delete','Api\JobController@deleteJobDetail');
+    Route::post('/job-detail/check','Api\JobController@checkJobDetail');
+
+});
+
+Route::prefix('comment')->group(function(){
+    Route::post('/create','Api\CommentController@create');
+    Route::post('/get','Api\CommentController@get');
+    Route::post('/delete','Api\CommentController@delete');
+    Route::post('/update','Api\CommentController@update');
+    Route::post('/repply','Api\CommentController@repply');
+    Route::post('/reply/delete','Api\CommentController@deleteReply');
+    Route::post('/reply/update','Api\CommentController@updateReply');
 
 });
 

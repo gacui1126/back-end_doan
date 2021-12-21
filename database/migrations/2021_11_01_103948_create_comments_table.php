@@ -17,7 +17,7 @@ class CreateCommentsTable extends Migration
             $table->id();
             $table->integer('user_id')->nullable();
             $table->integer('task_detail_id')->nullable();
-            $table->integer('parent_id');
+            $table->integer('parent_id')->default(0);
             $table->string('content');
             $table->timestamps();
         });
