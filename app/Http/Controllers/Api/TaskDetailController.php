@@ -101,6 +101,7 @@ class TaskDetailController extends Controller
         $deadline = date('Y-m-d H:i:s', strtotime($req->deadline));
         $taskDetail = Task_details::where('id',$req->taskDetailId)->first();
         $taskDetail->deadline = $deadline;
+        $taskDetail->completed = 0;
         $taskDetail->update();
         $now = date('Y-m-d H:i:s', strtotime(Carbon::now('Asia/Ho_Chi_Minh')));
         $date = Carbon::parse($deadline);
@@ -144,7 +145,7 @@ class TaskDetailController extends Controller
     public function deleteDeadline(Request $req){
         DB::table('task_details')->where('id',$req->taskDetailId)->update([
             'deadline' => null,
-            'completed' => null
+            'completed' => 0
         ]);
         return response()->json([
             'message' => 'Xoá deadline thành công',

@@ -9,6 +9,15 @@ use App\User;
 
 class TeamController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth:api')->except('login');
+        $this->middleware('permission:list team')->only('show');
+        $this->middleware('permission:add team')->only('create');
+        $this->middleware('permission:edit team')->only('update');
+        $this->middleware('permission:delete team')->only('delete');
+    }
     public function create(Request $req){
         $checkTeam = Teams::where('name', $req->name)->first();
         if($checkTeam){
@@ -27,11 +36,13 @@ class TeamController extends Controller
         }
     }
     public function show(Request $req){
-        $showTeam = Teams::orderBy('id','desc')->paginate($req->total);
-        return response()->json([
+        // if (auth('api')->user()->hasPermissionTo('list team', 'web')) {
+            $showTeam = Teams::orderBy('id', 'desc')->paginate($req->total);
+            return response()->json([
             'code' => 200,
             'data' => $showTeam
         ],200);
+        // }
     }
     public function delete(Request $req){
         $team = Teams::find($req->id);

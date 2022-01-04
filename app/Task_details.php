@@ -18,4 +18,10 @@ class Task_details extends Model
     public function tags(){
         return $this->belongsToMany(Tags::class,'tag_task_detail','task_detail_id','tag_id');
     }
+    public function comments(){
+        return $this->hasMany(Comments::class,'task_detail_id','id');
+    }
+    public function jobs(){
+        return $this->hasMany(jobs::class,'task_detail_id','id');
+    }
 }

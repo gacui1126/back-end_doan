@@ -10,6 +10,8 @@ class Teams extends Model
         'name'
     ];
 
+    protected $guard_name = 'api';
+
     public function users(){
         return $this->hasMany(User::class,'team_id','id');
     }

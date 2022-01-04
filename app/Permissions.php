@@ -9,6 +9,6 @@ class Permissions extends Model
     protected $Table = "permissions";
 
     public function permissionChildrent(){
-        return $this->hasMany(Permission::class,'parent_id');
+        return $this->hasMany(Permissions::class,'parent_id','id');
     }
 }

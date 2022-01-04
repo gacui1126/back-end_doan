@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Teams;
-use Symfony\Component\HttpFoundation\Request;
+
+// use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Auth;
@@ -17,9 +19,20 @@ use App\FileUpload;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+       $this->middleware('auth:api')->except('login');
+       $this->middleware('permission:list user')->only('getUserA');
+       $this->middleware('permission:add user')->only('CreateUser');
+       $this->middleware('permission:edit user')->only('updateUser');
+       $this->middleware('permission:delete user')->only('deleteUser');
+    }
+
     public function CreateUser(Request $req){
         $array = $req->inputs;
         $this->validate($req,[
@@ -81,7 +94,7 @@ class UserController extends Controller
             'password.min' => 'Mật khẩu không được ngắn hơn 8 kí tự',
             'password.max' => 'Mật khẩu không được dài hơn 20 kí tự'
         ]);
-        if(Auth::attempt([
+        if(Auth::guard('web')->attempt([
             'email' => $req->email,
             'password' => $req->password
         ])){
@@ -101,14 +114,26 @@ class UserController extends Controller
     }
 
     public function info(Request $req){
-        $user = $req->user('api');
+        $user = auth('api')->user();
         return response()->json(['data' => $user],200);
     }
 
-    public function getUser(Request $req){
-        $userAll = User::orderBy('id','desc')->paginate($req->total);
-        return response()->json(['data' => $userAll],200);
+    public function getUserA(Request $req){
+        // if(auth('api')->user()->hasPermissionTo('list user','api')){
+            $userAll = User::orderBy('id','desc')->paginate($req->total);
+            foreach($userAll as $u){
+                $u->teams;
+            }
+            return response()->json([
+                'data' => $userAll,
+            ],200);
+        // }else{
+        //     return response()->json([
+        //         'message' => 'Không có quyền truy cập',
+        //     ],403);
+        // }
     }
+
     public function editUSer(Request $req){
         $user = User::where('id',$req->id)->first();
         $user_team = User::find($req->id);
@@ -130,7 +155,6 @@ class UserController extends Controller
         $team = Teams::where('name',$team_name)->first();
         $user->team_id = $team->id;
 
-        // dd($user);
         $user->save();
         return response()->json([
             'message' => 'update user thành công',
@@ -219,5 +243,32 @@ class UserController extends Controller
                 ], 403);
             }
         }
+    }
+    public function all(){
+        $user = User::all();
+        return response()->json([
+            'data' => $user
+        ],200);
+    }
+
+    public function checkPer(Request $req){
+        if(!$req->user){
+            return response()->json([
+                'message' => 'Vui lòng chọn user cần kiểm tra'
+            ],422);
+        }else{
+            $user = $req->user;
+            $checkUser = User::where('id', $user['id'])->first();
+            $teams = $checkUser->teams;
+            $checkRole = $checkUser->getRoleNames();
+            $checkPer  = $checkUser->getPermissionNames();
+            return response()->json([
+                'user' => $checkUser,
+                'role' => $checkRole,
+                'permission' => $checkPer,
+                'team' => $teams
+            ],200);
+        }
+
     }
 }

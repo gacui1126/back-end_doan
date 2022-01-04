@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Routing\Route as RoutingRoute;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,9 +25,9 @@ Route::post('/login','Api\UserController@login')->name('login');
 Route::post('/send','Api\SendMailController@send_mail');
 
 Route::prefix('user')->group(function(){
-    Route::get('/get-all','Api\UserController@getUser');
-    Route::post('/create','Api\UserController@CreateUser')->name('create.user');
-    Route::get('/info','Api\UserController@info')->name('user.info')->middleware('auth:api');
+    Route::get('/get-all','Api\UserController@getUserA');
+    Route::post('/create','Api\UserController@CreateUser');
+    Route::get('/info','Api\UserController@info');
     Route::post('/edit', 'Api\UserController@editUser');
     Route::post('/update', 'Api\UserController@updateUser');
     Route::post('/delete', 'Api\UserController@deleteUser');
@@ -35,6 +36,9 @@ Route::prefix('user')->group(function(){
     Route::get('/get-avatar','Api\UserController@getAvatar');
     Route::post('/info/update', 'Api\UserController@updateUserInfo');
     Route::post('/info/reset-pass','Api\UserController@resetPass');
+    Route::get('/all','Api\UserController@all');
+    Route::post('/check-per','Api\UserController@checkPer');
+
 });
 
 Route::prefix('team')->group(function(){
@@ -51,7 +55,7 @@ Route::prefix('team')->group(function(){
 Route::prefix('project')->group(function(){
     Route::get('/get-all-data','Api\ProjectController@getAllData');
     Route::post('/create','Api\ProjectController@createProject');
-    Route::post('/all','Api\ProjectController@getProject');
+    Route::get('/all-project','Api\ProjectController@all');
     Route::post('/edit','Api\ProjectController@edit');
     Route::post('/update','Api\ProjectController@update');
     Route::post('/delete','Api\ProjectController@delete');
@@ -62,6 +66,8 @@ Route::prefix('project')->group(function(){
     Route::post('/add-team','Api\ProjectController@addTeam');
     Route::post('/add-user','Api\ProjectController@addUser');
     Route::post('/get-time','Api\ProjectController@getTime');
+    Route::post('/get/my-project','Api\ProjectController@getMyProject');
+    Route::get('/switch-pro','Api\ProjectController@switchPro');
 
 });
 
@@ -125,6 +131,26 @@ Route::prefix('comment')->group(function(){
 
 });
 
+Route::prefix('role')->group(function(){
+    Route::get('/get','Api\RoleController@get');
+    Route::post('/create','Api\RoleController@create');
+    Route::post('/edit','Api\RoleController@edit');
+    Route::post('/update','Api\RoleController@update');
+    Route::post('/delete','Api\RoleController@delete');
+    Route::get('/all','Api\RoleController@all');
+    Route::post('user-per','Api\RoleController@userPer');
+    Route::post('delete-role-user','Api\RoleController@deleteRoleUser');
+
+
+});
+
+Route::prefix('permission')->group(function(){
+    Route::get('/get','Api\PermissionController@get');
+    Route::get('/create','Api\PermissionController@create');
+    Route::get('/{permissionName}', 'Api\PermissionController@check');
+    Route::post('delete-per-user', 'Api\PermissionController@deletePerUser');
+    // Route::get('/get-user', 'Api\PermissionController@getUser');
+});
 
 
 

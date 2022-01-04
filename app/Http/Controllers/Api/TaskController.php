@@ -26,6 +26,23 @@ class TaskController extends Controller
         $task = Tasks::where('project_id',$req->id)->get();
         foreach($task as $ta){
             $taskDetail = $ta->task_details;
+            $taskDetail = Task_details::where('task_id',$ta->id)->get();
+            foreach($ta->task_details as $t){
+                $t->count_comment = 0;
+                $tag = $t->tags;
+                $comment = $t->comments;
+                foreach($t->comments as $co){
+                    $co->replies;
+                }
+                $t->jobs;
+                $t->count_job = 0;
+                $t->count_job_completed = 0;
+                $t->count_user = 0;
+                $t->users;
+                foreach($t->jobs as $j){
+                    $j->job_details;
+                }
+            }
             $ta->show = false;
         }
         return response()->json([

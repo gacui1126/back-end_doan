@@ -41,7 +41,7 @@ class TagController extends Controller
     public function addTagTask(Request $req){
         $checkTag = DB::table('tag_task_detail')->whereTag_idAndTask_detail_id($req->tagId,$req->taskDetailId)->first();
         if($checkTag){
-            DB::table('tag_task_detail')->where('tag_id',$req->tagId)->delete();
+            DB::table('tag_task_detail')->whereTag_idAndTask_detail_id($req->tagId,$req->taskDetailId)->delete();
             return response()->json([
                 'message' => 'Xoá tag khỏi thẻ'
             ],200);

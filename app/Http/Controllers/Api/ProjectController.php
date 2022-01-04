@@ -13,6 +13,16 @@ use SebastianBergmann\CodeCoverage\Report\Xml\Project;
 
 class ProjectController extends Controller
 {
+
+    public function __construct()
+    {
+       $this->middleware('auth:api')->except('login');
+       $this->middleware('permission:list project')->only('all');
+       $this->middleware('permission:add project')->only('createProject');
+       $this->middleware('permission:edit project')->only('update');
+       $this->middleware('permission:delete project')->only('delete');
+    }
+
     public function getAllData(){
         $teams = Teams::all();
         $users = User::all();
@@ -79,14 +89,24 @@ class ProjectController extends Controller
         }
 
     }
-    public function getProject(Request $req){
+
+    public function all(Request $req){
         $project = Projects::orderBy('id','desc')->paginate($req->total);
+        foreach($project as $pro){
+            $now = date('Y-m-d H:i:s', strtotime(Carbon::now('Asia/Ho_Chi_Minh')));
+            $date = Carbon::parse($pro->end_at);
+            if($date > $now){
+                $diff = $date->diffInDays($now);
+                $pro->deadline = $diff;
+            }else{
+                $pro->deadline = 0;
+            }
+        }
         return response()->json([
             'data' => $project,
         ],200);
-
-
     }
+
     public function edit(Request $req){
         $project = Projects::where('id', $req->id)->first();
         $projectName = $project->name;
@@ -109,7 +129,7 @@ class ProjectController extends Controller
         $data = $req->value;
         $checkName = Projects::where('name',$data['projectName'])->first();
 
-        if($checkName){
+        if($data['projectName'] != $project->name && $checkName){
             return response()->json([
                 'message' => 'Tên dự án đã tồn tại!! vui lòng chọn tên khác'
             ],422);
@@ -253,7 +273,25 @@ class ProjectController extends Controller
         ],200);
     }
 
-    public function projectAll(){
-
+    public function getMyProject(Request $req){
+        $user = auth('api')->user();
+        $user->projects;
+        return response()->json([
+            'data' => $user->projects
+        ],200);
+    }
+    public function switchPro(){
+        $user = auth('api')->user();
+        if($user->hasRole('Admin')){
+            $project = Projects::all();
+            return response()->json([
+                'data' => $project
+            ],200);
+        }else{
+            $project = $user->projects;
+            return response()->json([
+                'data' => $project
+            ],200);
+        }
     }
 }
