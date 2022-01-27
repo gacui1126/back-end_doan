@@ -282,7 +282,7 @@ class ProjectController extends Controller
     }
     public function switchPro(){
         $user = auth('api')->user();
-        if($user->hasRole('Admin')){
+        if($user->hasRole(['Admin','Manager'])){
             $project = Projects::all();
             return response()->json([
                 'data' => $project

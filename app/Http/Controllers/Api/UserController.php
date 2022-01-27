@@ -181,7 +181,7 @@ class UserController extends Controller
             $fileName = $imgName .'.'. $duoi;
             $id = $req->get('id');
             $user = User::where('id',$id)->first();
-            $user->img = $fileName;
+            $user->img = 'http://127.0.0.1:8080/storage/images/'.$fileName;
             $user->save();
 
             $req->file('image')->storeAs('images', $fileName, 'public');

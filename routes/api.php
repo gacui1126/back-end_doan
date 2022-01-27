@@ -146,11 +146,25 @@ Route::prefix('role')->group(function(){
 
 Route::prefix('permission')->group(function(){
     Route::get('/get','Api\PermissionController@get');
-    Route::get('/create','Api\PermissionController@create');
+    Route::post('/create','Api\PermissionController@create');
     Route::get('/{permissionName}', 'Api\PermissionController@check');
     Route::post('delete-per-user', 'Api\PermissionController@deletePerUser');
     // Route::get('/get-user', 'Api\PermissionController@getUser');
 });
+
+
+Route::prefix('chat')->group(function(){
+    Route::get('/user', 'Api\ChatsController@user');
+    Route::get('/messages/{user}', 'Api\ChatsController@fetchMessages');
+    Route::post('/messages/{user}', 'Api\ChatsController@sendMessage');
+    Route::post('/create-group', 'Api\ChatsController@createGroup');
+    Route::get('/all-group', 'Api\ChatsController@allGroup');
+    Route::post('/group/select', 'Api\ChatsController@groupSe');
+    Route::get('/get-mess', 'Api\ChatsController@getMess');
+    Route::post('/select-mess', 'Api\ChatsController@selectMess');
+});
+
+Route::post('/broadcasting/auth', 'BroadCastingController')->middleware('auth:api');
 
 
 

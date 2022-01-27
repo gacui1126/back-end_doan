@@ -20,11 +20,6 @@ class PermissionController extends Controller
     }
 
     public function check($permissionName) {
-        // $users = auth('api')->user()->getRoleNames();
-
-        // return response()->json([
-        //     'data' => $users
-        // ],200);
             if (!auth('api')->user()->hasPermissionTo($permissionName)) {
                abort(403);
             }
@@ -40,13 +35,13 @@ class PermissionController extends Controller
     }
 
     public function create(Request $req){
-        // $permission = Permission::create(['name' => $req->name]);
+        $permission = Permission::create(['name' => $req->name]);
         // $role = Role::find(1);
         // $permission = Permission::find(3);
         // $role->givePermissionTo($permission);
 
-        $user = User::where('id',100)->first();
-        $user->hasRole('Admin');
+        // $user = User::where('id',100)->first();
+        // $user->hasRole('Admin');
         // auth()->user()->assignRole('Admin');
     }
 

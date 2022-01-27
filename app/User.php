@@ -61,4 +61,15 @@ class User extends Authenticatable
     public function tags(){
         return $this->belongsToMany(Tags::class,'tag_user','user_id','tag_id');
     }
+
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class,'user_id','id');
+    }
+
+    // public function messageRe()
+    // {
+    //     return $this->hasMany(Message::class, 'receiver_id', 'id');
+    // }
 }

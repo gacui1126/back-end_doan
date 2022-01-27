@@ -1,5 +1,7 @@
 <?php
 
+use App\GroupChat;
+use App\Message;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -13,6 +15,22 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+// Broadcast::channel('App.User.{id}', function ($user, $id) {
+//     return (int) $user->id === (int) $id;
+// });
+
+Broadcast::channel('privateChat.{receiverId}', function ($user, $receiverId) {
+    return auth('api')->check();
 });
+
+Broadcast::channel('joinChat', function ($user) {
+    return $user;
+});
+
+// Broadcast::channel('chat.{user}', function ($user, GroupChat $group) {
+//     return $group->hasUser($user->id);
+// });
+
+// Broadcast::channel('privateChat', function ($user) {
+//     return auth('api')->check();
+// });
