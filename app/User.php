@@ -40,10 +40,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    // public function roles(){
-    //     return $this->belongsToMany(Roles::class,'role_user','user_id','role_id');
-    // }
-
     public function comments(){
         return $this->hasMany(Comments::class, 'user_id', 'id');
     }
@@ -62,14 +58,17 @@ class User extends Authenticatable
         return $this->belongsToMany(Tags::class,'tag_user','user_id','tag_id');
     }
 
+    public function taskDetail(){
+        return $this->belongsToMany(Task_details::class,'task_detail_user','user_id','task_detail_id');
+    }
 
     public function messages()
     {
         return $this->hasMany(Message::class,'user_id','id');
     }
 
-    // public function messageRe()
-    // {
-    //     return $this->hasMany(Message::class, 'receiver_id', 'id');
-    // }
+    public function notications(){
+        return $this->belongsToMany(Notications::class,'noti_user','user_id','noti_id');
+    }
+
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\TagEvent;
+use App\Events\TaskDetailEvent;
 use App\Http\Controllers\Controller;
 use App\Tags;
 use App\Task_detail_user;
@@ -39,22 +41,34 @@ class TagController extends Controller
         ],200);
     }
     public function addTagTask(Request $req){
+        $userId = auth('api')->id();
+        $taskDetail = Task_details::where('id',$req->taskDetailId)->first();
+        $userInCard = $taskDetail->users;
         $checkTag = DB::table('tag_task_detail')->whereTag_idAndTask_detail_id($req->tagId,$req->taskDetailId)->first();
-        if($checkTag){
-            DB::table('tag_task_detail')->whereTag_idAndTask_detail_id($req->tagId,$req->taskDetailId)->delete();
-            return response()->json([
-                'message' => 'Xoá tag khỏi thẻ'
-            ],200);
-        }else{
-            DB::table('tag_task_detail')->insert([
-                'tag_id' => $req->tagId,
-                'task_detail_id' => $req->taskDetailId
-            ]);
-            return response()->json([
-                'message' => 'Add tag vào thẻ thành công'
-            ],200);
+        $tag = Tags::where('id',$req->tagId)->first();
+        foreach($userInCard as $u){
+            if($u->id == $userId){
+                if($checkTag){
+                    DB::table('tag_task_detail')->whereTag_idAndTask_detail_id($req->tagId,$req->taskDetailId)->delete();
+                    broadcast(new TagEvent($taskDetail,$tag))->toOthers();
+                    return response()->json([
+                        'message' => 'Xoá tag khỏi thẻ'
+                    ],200);
+                }else{
+                    DB::table('tag_task_detail')->insert([
+                        'tag_id' => $req->tagId,
+                        'task_detail_id' => $req->taskDetailId
+                    ]);
+                    broadcast(new TagEvent($taskDetail,$tag))->toOthers();
+                    return response()->json([
+                        'message' => 'Add tag vào thẻ thành công'
+                    ], 200);
+                }
+            }
         }
-
+        return response()->json([
+            'message' => 'Bạn không thuộc thẻ này!!! không thể thực hiện thao tác này'
+        ],422);
     }
     public function getTagTaskDetail(Request $req){
         $taskDetail = Task_details::where('id',$req->taskDetailId)->first();

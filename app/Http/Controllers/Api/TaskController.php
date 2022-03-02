@@ -9,6 +9,8 @@ use App\Task_details;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use LengthException;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -39,6 +41,13 @@ class TaskController extends Controller
                 $t->count_job_completed = 0;
                 $t->count_user = 0;
                 $t->users;
+                $now = date('Y-m-d H:i:s', strtotime(Carbon::now('Asia/Ho_Chi_Minh')));
+                $date = Carbon::parse($t->deadline);
+                if($date > $now){
+                    $t->diff = $date->diffInMinutes($now);
+                }else{
+                    $t->diff = 0;
+                }
                 foreach($t->jobs as $j){
                     $j->job_details;
                 }
@@ -80,6 +89,7 @@ class TaskController extends Controller
     public function deleteTask(Request $req){
         $task = Tasks::where('id',$req->id)->first();
         $task->delete();
+        DB::table('task_details')->where('task_id',$req->id)->delete();
         return response()->json([
             'message' => 'Xoá task thành công'
         ],200);

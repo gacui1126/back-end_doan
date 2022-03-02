@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Teams;
 use Illuminate\Http\Request;
 use App\User;
+use Illuminate\Support\Facades\DB;
 
 class TeamController extends Controller
 {
@@ -26,6 +27,20 @@ class TeamController extends Controller
                 'message' => 'Tên team đã tồn tại, vui lòng nhập tên khác'
             ],404);
         }else{
+            if($req->users){
+                $team = Teams::create([
+                    'name' => $req->name
+                ]);
+                foreach($req->users as $u){
+                    $user = User::where('id',$u['id'])->first();
+                    $user->team_id = $team->id;
+                    $user->update();
+                }
+                return response()->json([
+                    'code' => 200,
+                    'message' => 'Tạo tành công'
+                ],200);
+            }
             $team = Teams::create([
                 'name' => $req->name
             ]);

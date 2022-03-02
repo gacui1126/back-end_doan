@@ -96,8 +96,15 @@ Route::prefix('task-detail')->group(function(){
     Route::post('/completed','Api\TaskDetailController@completed');
     Route::post('/completed/get','Api\TaskDetailController@getCompleted');
     Route::post('/delete','Api\TaskDetailController@delete');
+    Route::post('/task-for-me','Api\TaskDetailController@taskForMe');
+    Route::post('complete-confirmation','Api\TaskDetailController@CompleteConfi');
+    Route::post('get-request-complete','Api\TaskDetailController@getReComplete');
+    Route::post('get-request-complete/detroy','Api\TaskDetailController@detroyRE');
+    Route::post('/manager/complete-confirm','Api\TaskDetailController@managerCompleteConfir');
+    Route::post('get-all-data','Api\TaskDetailController@getAllData');
 
 });
+Route::post('task-detail/history-change','Api\TaskDetailController@historyChange');
 
 Route::prefix('tag')->group(function(){
     Route::post('/create','Api\TagController@create');
@@ -140,6 +147,7 @@ Route::prefix('role')->group(function(){
     Route::get('/all','Api\RoleController@all');
     Route::post('user-per','Api\RoleController@userPer');
     Route::post('delete-role-user','Api\RoleController@deleteRoleUser');
+    Route::post('check-role','Api\RoleController@checkRole');
 
 
 });
@@ -164,6 +172,26 @@ Route::prefix('chat')->group(function(){
     Route::post('/select-mess', 'Api\ChatsController@selectMess');
 });
 
+Route::prefix('notications')->group(function(){
+    Route::post('/get-noti','Api\NoticationController@getNoti');
+    Route::post('select-noti','Api\NoticationController@selectNoti');
+});
+
+Route::prefix('file')->group(function(){
+    Route::post('/upload','Api\FileController@upload');
+    Route::post('/get-file','Api\FileController@GetFile');
+    Route::get('/download/{id}','Api\FileController@downloadFile');
+    Route::post('/delete','Api\FileController@delete');
+    Route::post('/get-all','Api\FileController@getAll');
+    Route::post('/update','Api\FileController@update');
+});
+
+Route::prefix('overview')->group(function(){
+    Route::get('/get/data/project','Api\OverviewController@getProject');
+    Route::get('/get/data/user','Api\OverviewController@getUser');
+    Route::post('/chart-project-data','Api\OverviewController@chartProjectData');
+
+});
 Route::post('/broadcasting/auth', 'BroadCastingController')->middleware('auth:api');
 
 

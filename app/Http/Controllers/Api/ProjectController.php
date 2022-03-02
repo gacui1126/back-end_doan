@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\NoticationEvent;
 use App\Http\Controllers\Controller;
+use App\Notications;
 use App\Projects;
+use App\Task_details;
 use Illuminate\Http\Request;
 use App\Teams;
 use App\User;
@@ -16,7 +19,7 @@ class ProjectController extends Controller
 
     public function __construct()
     {
-       $this->middleware('auth:api')->except('login');
+    //    $this->middleware('auth:api')->except('login');
        $this->middleware('permission:list project')->only('all');
        $this->middleware('permission:add project')->only('createProject');
        $this->middleware('permission:edit project')->only('update');
@@ -61,6 +64,22 @@ class ProjectController extends Controller
                 'user_create_id' => $user->id
             ]);
 
+            //thêm người tạo vào
+            DB::table('project_user')->insert([
+                'project_id' => $project->id,
+                'user_id' => $user->id
+            ]);
+
+            $notication = Notications::create([
+                'content' => 'Bạn đã được thêm vào dự án : ' .''. $project->name,
+            ]);
+
+            //Tạo thông báo cho người tạo
+            DB::table('noti_user')->insert([
+                'user_id' => $user->id,
+                'noti_id' => $notication->id,
+            ]);
+            broadcast(new NoticationEvent($notication,$user));
             $team = $data['team'];
             foreach ($team as $teams) {
                 DB::table('project_team')->insert([
@@ -74,6 +93,12 @@ class ProjectController extends Controller
                     'project_id' => $project->id,
                     'user_id' => $users['id']
                 ]);
+                DB::table('noti_user')->insert([
+                    'user_id' => $users['id'],
+                    'noti_id' => $notication->id,
+                ]);
+                $userChannel = User::where('id',$users['id'])->first();
+            broadcast(new NoticationEvent($notication,$userChannel));
             }
 
             return response()->json([
@@ -94,12 +119,22 @@ class ProjectController extends Controller
         $project = Projects::orderBy('id','desc')->paginate($req->total);
         foreach($project as $pro){
             $now = date('Y-m-d H:i:s', strtotime(Carbon::now('Asia/Ho_Chi_Minh')));
+            $taskDetail = Task_details::where('project_id',$pro->id)->get();
             $date = Carbon::parse($pro->end_at);
             if($date > $now){
                 $diff = $date->diffInDays($now);
                 $pro->deadline = $diff;
             }else{
                 $pro->deadline = 0;
+            }
+            $pro->task_details = $taskDetail;
+            $pro->countComplete = 0;
+            $pro->countTaskDetail = 0;
+            foreach($pro->task_details as $t){
+                if($t->completed == 1){
+                    $pro->countComplete = $pro->countComplete + 1;
+                }
+                $pro->countTaskDetail = $pro->countTaskDetail + 1;
             }
         }
         return response()->json([
@@ -190,6 +225,9 @@ class ProjectController extends Controller
         $project = Projects::where('id',$req->id)->first();
         $userCreate = User::where('id',$project->user_create_id)->first();
         $teams = $project->teams;
+        foreach($teams as $t){
+            $t->users;
+        }
         $users = $project->users;
         return response()->json([
             'project' => $project,
@@ -275,9 +313,29 @@ class ProjectController extends Controller
 
     public function getMyProject(Request $req){
         $user = auth('api')->user();
-        $user->projects;
+        $project = $user->projects;
+        foreach($project as $pro){
+            $taskDetail = Task_details::where('project_id',$pro->id)->get();
+            $now = date('Y-m-d H:i:s', strtotime(Carbon::now('Asia/Ho_Chi_Minh')));
+            $date = Carbon::parse($pro->end_at);
+            if($date > $now){
+                $diff = $date->diffInDays($now);
+                $pro->deadline = $diff;
+            }else{
+                $pro->deadline = 0;
+            }
+            $pro->task_details = $taskDetail;
+            $pro->countComplete = 0;
+            $pro->countTaskDetail = 0;
+            foreach($pro->task_details as $t){
+                if($t->completed == 1){
+                    $pro->countComplete = $pro->countComplete + 1;
+                }
+                $pro->countTaskDetail = $pro->countTaskDetail + 1;
+            }
+        }
         return response()->json([
-            'data' => $user->projects
+            'data' => $project
         ],200);
     }
     public function switchPro(){

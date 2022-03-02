@@ -27,10 +27,12 @@ Broadcast::channel('joinChat', function ($user) {
     return $user;
 });
 
-// Broadcast::channel('chat.{user}', function ($user, GroupChat $group) {
-//     return $group->hasUser($user->id);
-// });
+Broadcast::channel('notication.{userId}', function ($noti) {
+    // return (int) auth('api')->user()->id != (int) $project->user_id;
+    return auth('api')->check();
+});
 
-// Broadcast::channel('privateChat', function ($user) {
-//     return auth('api')->check();
-// });
+Broadcast::channel('taskdetail.{taskdetailId}', function ($taskdetail) {
+    // return (int) auth('api')->user()->id != (int) $project->user_id;
+    return auth('api')->check();
+});

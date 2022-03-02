@@ -7,6 +7,8 @@ use App\Roles;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
@@ -141,5 +143,13 @@ class RoleController extends Controller
         return response()->json([
             'message' => 'Xoá quyền khỏi user thành công'
         ],200);
+    }
+
+    public function checkRole(){
+        $user = auth('api')->user();
+        $roles = $user->getRoleNames();
+        return response()->json([
+            'data' => $roles
+        ]);
     }
 }

@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Comments;
+use App\Events\commentEvent;
+use App\Events\ReplyCommentEvent;
 use App\Http\Controllers\Controller;
+use App\Task_details;
 use App\User;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
     public function create(Request $req){
+        $taskDetail = Task_details::where('id',$req->taskDetailId)->first();
         if($req->comment){
             $comment = new Comments;
             $comment->user_id = $req->userId;
@@ -24,6 +28,7 @@ class CommentController extends Controller
             $re = $comment->replies;
             // $re->Edit = false;
             // $re->OEdit = true;
+            broadcast(new commentEvent($taskDetail,$comment))->toOthers();
             return response()->json([
                 'message' => 'Thêm bình luận thành công',
                 'data' => $comment
@@ -55,7 +60,10 @@ class CommentController extends Controller
     }
 
     public function delete(Request $req){
-        $comment = Comments::where('id',$req->id)->delete();
+        $comment = Comments::where('id',$req->id)->first();
+        $taskDetail = Task_details::where('id',$comment->task_detail_id)->first();
+        broadcast(new commentEvent($taskDetail,$comment))->toOthers();
+        $comment->delete();
         return response()->json([
             'message' => 'Xoá dữ liệu thành công'
         ],200);
@@ -63,8 +71,11 @@ class CommentController extends Controller
     public function update(Request $req){
         if($req->comment){
             $comment = Comments::where('id',$req->id)->first();
+            $taskDetail = Task_details::where('id',$comment->task_detail_id)->first();
+            broadcast(new commentEvent($taskDetail,$comment))->toOthers();
             $comment->content = $req->comment;
             $comment->update();
+
             return response()->json([
                 'message' => 'chỉnh sửa comment thành công'
             ],200);
@@ -89,6 +100,10 @@ class CommentController extends Controller
             $comment->showRepply = false;
             $comment->Edit = false;
             $comment->OEdit = true;
+            $commentParent = Comments::where('id',$req->parent_id)->first();
+            $taskDetail = Task_details::where('id',$commentParent->task_detail_id)->first();
+            $event = 'replyComment';
+            broadcast(new ReplyCommentEvent($taskDetail,$comment,$event))->toOthers();
             return response()->json([
                 'message' => 'Thêm bình luận thành công',
                 'data' => $comment
@@ -101,7 +116,12 @@ class CommentController extends Controller
     }
 
     public function deleteReply(Request $req){
-        $comment = Comments::where('id',$req->id)->delete();
+        $comment = Comments::where('id',$req->id)->first();
+        $commentParent = Comments::where('id',$comment->parent_id)->first();
+        $taskDetail = Task_details::where('id',$commentParent->task_detail_id)->first();
+        $event = 'deleteComment';
+        broadcast(new ReplyCommentEvent($taskDetail,$comment,$event))->toOthers();
+        $comment->delete();
         return response()->json([
             'data' => $comment
         ],200);

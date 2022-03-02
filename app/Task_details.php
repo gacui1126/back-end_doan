@@ -9,7 +9,7 @@ class Task_details extends Model
     protected $fillable = [
         'name', 'user_create_id' , 'task_id','project_id','completed','deadline'
     ];
-    public function task_details(){
+    public function tasks(){
         return $this->belongsTo(Tasks::class,'id','task_id');
     }
     public function users(){
@@ -23,5 +23,11 @@ class Task_details extends Model
     }
     public function jobs(){
         return $this->hasMany(jobs::class,'task_detail_id','id');
+    }
+    public function files(){
+        return $this->hasMany(File::class,'task_detail_id','id');
+    }
+    public function projects(){
+        return $this->belongsto(Projects::class,'project_id','id');
     }
 }
