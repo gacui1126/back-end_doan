@@ -15,14 +15,20 @@ use Illuminate\Support\Facades\DB;
 class TaskController extends Controller
 {
     public function create(Request $req){
-        Tasks::create([
-            'name' => $req->name,
-            'project_id' => $req->project_id,
-            'user_id' => $req->user_id,
-        ]);
+        $project = Projects::where('id',$req->project_id)->first();
+        if(auth('api')->id() == $project->user_create_id){
+            Tasks::create([
+                'name' => $req->name,
+                'project_id' => $req->project_id,
+                'user_id' => $req->user_id,
+            ]);
+            return response()->json([
+                'message' => 'Tạo task thành công'
+            ],200);
+        }
         return response()->json([
-            'message' => 'Tạo task thành công'
-        ],200);
+            'message' => 'Bạn không có quyền'
+        ],422);
     }
     public function getAll(Request $req){
         $task = Tasks::where('project_id',$req->id)->get();
@@ -68,6 +74,7 @@ class TaskController extends Controller
     }
 
     public function updateName(Request $req){
+
         $task = Tasks::where('id', $req->id)->first();
         if(!$req->name){
             return response()->json([
@@ -79,20 +86,32 @@ class TaskController extends Controller
                 'message' => 'Tên task không quá 30 kí tự'
             ],422);
         }
-        $task->name = $req->name;
-        $task->update();
-        return response()->json([
-            'message' => 'update thành công'
-        ],200);
+        // $project = Projects::where('id',$req->project_id)->first();
+        // if(auth('api')->id() == $project->user_create_id){
+            $task->name = $req->name;
+            $task->update();
+            return response()->json([
+                'message' => 'update thành công'
+            ],200);
+        // }
+        // return response()->json([
+        //     'message' => 'Bạn không có quyền'
+        // ],422);
     }
 
     public function deleteTask(Request $req){
         $task = Tasks::where('id',$req->id)->first();
-        $task->delete();
-        DB::table('task_details')->where('task_id',$req->id)->delete();
+        $project = Projects::where('id',$task->project_id)->first();
+        if (auth('api')->id() == $project->user_create_id) {
+            $task->delete();
+            DB::table('task_details')->where('task_id', $req->id)->delete();
+            return response()->json([
+                'message' => 'Xoá task thành công'
+            ], 200);
+        }
         return response()->json([
-            'message' => 'Xoá task thành công'
-        ],200);
+            'message' => 'Bạn không có quyền này'
+        ], 422);
     }
     public function getTask(Request $req){
         $task = Tasks::where('id',$req->id)->first();
@@ -100,12 +119,4 @@ class TaskController extends Controller
             'data' => $task
         ],200);
     }
-    // public function parameter(){
-    //     $taskAll = Tasks::all();
-
-    //     $taskAll->task_details;
-    //     return response()->json([
-    //         'data' => $taskAll
-    //     ],200);
-    // }
 }

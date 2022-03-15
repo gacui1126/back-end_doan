@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Notications;
+use App\Task_details;
 use App\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -12,7 +12,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NoticationEvent implements ShouldBroadcast
+class SendRQCompleteCardEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -21,12 +21,11 @@ class NoticationEvent implements ShouldBroadcast
      *
      * @return void
      */
-
-    public $notication;
+    public $RQ;
     public $user;
-    public function __construct($notication,User $user)
+    public function __construct($RQ,User $user)
     {
-        $this->notication = $notication;
+        $this->RQ = $RQ;
         $this->user = $user;
     }
 
@@ -42,7 +41,7 @@ class NoticationEvent implements ShouldBroadcast
     public function broadcastWith()
     {
         return  [
-            'notication'=> $this->notication
+            'RQ'=> $this->RQ
         ];
     }
 }

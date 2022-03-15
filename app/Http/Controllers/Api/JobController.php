@@ -148,7 +148,15 @@ class JobController extends Controller
     }
 
     public function checkJobDetail(Request $req){
-        DB::table('job_details')->where('id',$req->id)->update([
+        // DB::table('job_details')->where('id',$req->id)->update([
+        //     'check' => $req->check
+        // ]);
+        $jobD = Job_detail::where('id',$req->id)->first();
+        $job = Jobs::where('id',$jobD->job_id)->first();
+        $taskDetail = Task_details::where('id',$job->task_detail_id)->first();
+        $event = 'checkJobD';
+        broadcast(new JobListEvent($taskDetail,$jobD,$event))->toOthers();
+        $jobD->update([
             'check' => $req->check
         ]);
         return response()->json([

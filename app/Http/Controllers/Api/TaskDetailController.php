@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\completeConfirmation;
 use App\Events\NoticationEvent;
+use App\Events\SendRQCompleteCardEvent;
 use App\Http\Controllers\Controller;
 use App\Notications;
 use App\Projects;
@@ -38,30 +39,35 @@ class TaskDetailController extends Controller
         $date = Carbon::parse($deadline);
         $project = Projects::where('id',$req->project_id)->first();
         $deadlineProject = Carbon::parse($project->end_at);
-        if($date > $now){
-            if($date < $deadlineProject){
-                $card = Task_details::create([
-                    'name' => $req->cardName,
-                    'user_create_id' => $req->userId,
-                    'task_id' => $req->taskId,
-                    'project_id' => $req->project_id,
-                    'deadline' => $deadline,
-                    'completed' => 0
-                ]);
-                return response() -> json([
-                    'message' => 'Tạo thẻ thành công',
-                    'data' => $card
-                ],200);
+        if(auth('api')->id() == $project->user_create_id){
+            if($date > $now){
+                if($date < $deadlineProject){
+                    $card = Task_details::create([
+                        'name' => $req->cardName,
+                        'user_create_id' => $req->userId,
+                        'task_id' => $req->taskId,
+                        'project_id' => $req->project_id,
+                        'deadline' => $deadline,
+                        'completed' => 0
+                    ]);
+                    return response() -> json([
+                        'message' => 'Tạo thẻ thành công',
+                        'data' => $card
+                    ],200);
+                }else{
+                    return response() -> json([
+                        'message' => 'Deadline bạn chọn lớn hơn deadline của dự án vui lòng chọn lại',
+                    ],422);
+                }
             }else{
                 return response() -> json([
-                    'message' => 'Deadline bạn chọn lớn hơn deadline của dự án vui lòng chọn lại',
+                    'message' => 'Vui lòng chọn deadline lớn hơn thời điểm hiện tại',
                 ],422);
             }
-        }else{
-            return response() -> json([
-                'message' => 'Vui lòng chọn deadline lớn hơn thời điểm hiện tại',
-            ],422);
         }
+        return response()->json([
+            'message' => 'Bạn không có quyền này',
+        ],422);
     }
     public function get(Request $req){
         $taskDetail = Task_details::where('project_id', $req->id)->get();
@@ -245,11 +251,17 @@ class TaskDetailController extends Controller
         ],200);
     }
     public function delete(Request $req){
-        $taskDetail = Task_details::where('id',$req->id)->delete();
+        $taskDetail = Task_details::where('id',$req->id)->first();
+        if(auth('api')->id() == $taskDetail->user_create_id){
+            $taskDetail->delete();
+            return response()->json([
+                'message' => ' xoá thành công',
+                'data' => $taskDetail
+            ],200);
+        }
         return response()->json([
-            'message' => ' xoá thành công',
-            'data' => $taskDetail
-        ],200);
+            'message' => 'Bạn không có quyền này'
+        ],422);
     }
 
     public function taskForMe(){
@@ -276,13 +288,16 @@ class TaskDetailController extends Controller
         $userInCard = $taskDetail->users;
         $complete = completeConfirmation::where('task_detail_id',$taskDetail->id)->first();
         foreach($userInCard as $u){
-            if($senderId == $u->id){
+            if($u->id == $senderId){
                 if(!$complete && $taskDetail->completed == 0){
                     completeConfirmation::create([
                         'sender_id' => $senderId,
                         'receiver_id' => $taskDetail->user_create_id,
                         'task_detail_id' => $taskDetail->id,
                     ]);
+                    $userChannel = User::where('id',$taskDetail->user_create_id)->first();
+                    $notication = 'Bạn có yêu cầu xác nhận công việc, vui lòng kiểm tra';
+                    broadcast(new SendRQCompleteCardEvent($notication,$userChannel));
                     return response()->json([
                         'msg' => 'Đã gửi xác nhận cho người quản lý dự án'
                     ],200);
@@ -296,10 +311,6 @@ class TaskDetailController extends Controller
                         'msg' => 'Yêu cầu đã được gửi trước đó, vui lòng đợi phản hồi.'
                     ],422);
                 }
-            }else{
-                return response()->json([
-                    'msg' => 'Bạn không thuộc thẻ này, không thực hiện thao tác này được'
-                ],422);
             }
         }
 
