@@ -50,6 +50,12 @@ class TaskDetailController extends Controller
                         'deadline' => $deadline,
                         'completed' => 0
                     ]);
+                    foreach($req->user as $u){
+                        DB::table('task_detail_user')->insert([
+                            'task_detail_id' => $card->id,
+                            'user_id' => $u['id']
+                        ]);
+                    }
                     return response() -> json([
                         'message' => 'Tạo thẻ thành công',
                         'data' => $card
